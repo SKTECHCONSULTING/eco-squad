@@ -1,0 +1,11 @@
+{
+  "name": "verification-lambda",
+  "version": "1.0.0",
+  "description": "Image verification Lambda for EcoSquad",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.500.0",
+    "@aws-sdk/client-rekognition": "^3.500.0",
+    "@aws-sdk/lib-dynamodb": "^3.500.0"
+  }
+}
