@@ -99,6 +99,18 @@ export const UuidParamSchema = z.object({
   id: z.string().uuid('Invalid ID format'),
 });
 
+// Auth Schemas
+export const SignupSchema = z.object({
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+});
+
+export const LoginSchema = z.object({
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
+});
+
 // Types inferred from schemas
 export type CreateMissionInput = z.infer<typeof CreateMissionSchema>;
 export type UpdateMissionInput = z.infer<typeof UpdateMissionSchema>;
@@ -108,3 +120,5 @@ export type CreateSquadInput = z.infer<typeof CreateSquadSchema>;
 export type UpdateSquadInput = z.infer<typeof UpdateSquadSchema>;
 export type AddMemberInput = z.infer<typeof AddMemberSchema>;
 export type DiscoverMissionsQuery = z.infer<typeof DiscoverMissionsQuerySchema>;
+export type SignupInput = z.infer<typeof SignupSchema>;
+export type LoginInput = z.infer<typeof LoginSchema>;

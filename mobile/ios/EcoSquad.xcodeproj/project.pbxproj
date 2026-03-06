@@ -1,0 +1,473 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 56;
+    objects = {
+
+/* Begin PBXBuildFile section */
+        ECO00001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00000 /* ContentView.swift */; };
+        ECO00003 /* MissionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00002 /* MissionListView.swift */; };
+        ECO00005 /* MissionMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00004 /* MissionMapView.swift */; };
+        ECO00007 /* MissionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00006 /* MissionDetailView.swift */; };
+        ECO00009 /* SquadViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00008 /* SquadViews.swift */; };
+        ECO00011 /* ProfileViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00010 /* ProfileViews.swift */; };
+        ECO00013 /* MissionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00012 /* MissionModels.swift */; };
+        ECO00015 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00014 /* APIService.swift */; };
+        ECO00017 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00016 /* LocationService.swift */; };
+        ECO00019 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00018 /* CameraService.swift */; };
+        ECO00021 /* MissionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00020 /* MissionsViewModel.swift */; };
+        ECO00023 /* MissionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00022 /* MissionDetailViewModel.swift */; };
+        ECO00025 /* SquadsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00024 /* SquadsViewModel.swift */; };
+        ECO00027 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00026 /* ProfileViewModel.swift */; };
+        ECO00029 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00028 /* CameraViewModel.swift */; };
+        ECO00031 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECO00030 /* Extensions.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+        ECO00000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+        ECO00002 /* MissionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionListView.swift; sourceTree = "<group>"; };
+        ECO00004 /* MissionMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionMapView.swift; sourceTree = "<group>"; };
+        ECO00006 /* MissionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionDetailView.swift; sourceTree = "<group>"; };
+        ECO00008 /* SquadViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadViews.swift; sourceTree = "<group>"; };
+        ECO00010 /* ProfileViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViews.swift; sourceTree = "<group>"; };
+        ECO00012 /* MissionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionModels.swift; sourceTree = "<group>"; };
+        ECO00014 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+        ECO00016 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+        ECO00018 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+        ECO00020 /* MissionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionsViewModel.swift; sourceTree = "<group>"; };
+        ECO00022 /* MissionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionDetailViewModel.swift; sourceTree = "<group>"; };
+        ECO00024 /* SquadsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadsViewModel.swift; sourceTree = "<group>"; };
+        ECO00026 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+        ECO00028 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+        ECO00030 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+        ECO10000 /* EcoSquad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EcoSquad.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        ECO10001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+        ECO20000 /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+        ECO30000 = {
+            isa = PBXGroup;
+            children = (
+                ECO30001 /* EcoSquad */,
+                ECO30002 /* Products */,
+            );
+            sourceTree = "<group>";
+        };
+        ECO30001 /* EcoSquad */ = {
+            isa = PBXGroup;
+            children = (
+                ECO30010 /* Views */,
+                ECO30011 /* Models */,
+                ECO30012 /* ViewModels */,
+                ECO30013 /* Services */,
+                ECO30014 /* Utils */,
+                ECO30015 /* Resources */,
+                ECO10001 /* Info.plist */,
+            );
+            path = EcoSquad;
+            sourceTree = "<group>";
+        };
+        ECO30002 /* Products */ = {
+            isa = PBXGroup;
+            children = (
+                ECO10000 /* EcoSquad.app */,
+            );
+            name = Products;
+            sourceTree = "<group>";
+        };
+        ECO30010 /* Views */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00000 /* ContentView.swift */,
+                ECO30020 /* Missions */,
+                ECO30021 /* Squads */,
+                ECO30022 /* Profile */,
+                ECO30023 /* Common */,
+            );
+            path = Views;
+            sourceTree = "<group>";
+        };
+        ECO30011 /* Models */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00012 /* MissionModels.swift */,
+            );
+            path = Models;
+            sourceTree = "<group>";
+        };
+        ECO30012 /* ViewModels */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00020 /* MissionsViewModel.swift */,
+                ECO00022 /* MissionDetailViewModel.swift */,
+                ECO00024 /* SquadsViewModel.swift */,
+                ECO00026 /* ProfileViewModel.swift */,
+                ECO00028 /* CameraViewModel.swift */,
+            );
+            path = ViewModels;
+            sourceTree = "<group>";
+        };
+        ECO30013 /* Services */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00014 /* APIService.swift */,
+                ECO00016 /* LocationService.swift */,
+                ECO00018 /* CameraService.swift */,
+            );
+            path = Services;
+            sourceTree = "<group>";
+        };
+        ECO30014 /* Utils */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00030 /* Extensions.swift */,
+            );
+            path = Utils;
+            sourceTree = "<group>";
+        };
+        ECO30015 /* Resources */ = {
+            isa = PBXGroup;
+            children = (
+            );
+            path = Resources;
+            sourceTree = "<group>";
+        };
+        ECO30020 /* Missions */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00002 /* MissionListView.swift */,
+                ECO00004 /* MissionMapView.swift */,
+                ECO00006 /* MissionDetailView.swift */,
+            );
+            path = Missions;
+            sourceTree = "<group>";
+        };
+        ECO30021 /* Squads */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00008 /* SquadViews.swift */,
+            );
+            path = Squads;
+            sourceTree = "<group>";
+        };
+        ECO30022 /* Profile */ = {
+            isa = PBXGroup;
+            children = (
+                ECO00010 /* ProfileViews.swift */,
+            );
+            path = Profile;
+            sourceTree = "<group>";
+        };
+        ECO30023 /* Common */ = {
+            isa = PBXGroup;
+            children = (
+            );
+            path = Common;
+            sourceTree = "<group>";
+        };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+        ECO40000 /* EcoSquad */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = ECO50000 /* Build configuration list for PBXNativeTarget "EcoSquad" */;
+            buildPhases = (
+                ECO40001 /* Sources */,
+                ECO20000 /* Frameworks */,
+                ECO40002 /* Resources */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+            );
+            name = EcoSquad;
+            productName = EcoSquad;
+            productReference = ECO10000 /* EcoSquad.app */;
+            productType = "com.apple.product-type.application";
+        };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+        ECO60000 /* Project object */ = {
+            isa = PBXProject;
+            attributes = {
+                BuildIndependentTargetsInParallel = 1;
+                LastSwiftUpdateCheck = 1500;
+                LastUpgradeCheck = 1500;
+                TargetAttributes = {
+                    ECO40000 = {
+                        CreatedOnToolsVersion = 15.0;
+                    };
+                };
+            };
+            buildConfigurationList = ECO60001 /* Build configuration list for PBXProject "EcoSquad" */;
+            compatibilityVersion = "Xcode 14.0";
+            developmentRegion = en;
+            hasScannedForEncodings = 0;
+            knownRegions = (
+                en,
+                Base,
+            );
+            mainGroup = ECO30000;
+            productRefGroup = ECO30002 /* Products */;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (
+                ECO40000 /* EcoSquad */,
+            );
+        };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+        ECO40002 /* Resources */ = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+        ECO40001 /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                ECO00001 /* ContentView.swift in Sources */,
+                ECO00003 /* MissionListView.swift in Sources */,
+                ECO00005 /* MissionMapView.swift in Sources */,
+                ECO00007 /* MissionDetailView.swift in Sources */,
+                ECO00009 /* SquadViews.swift in Sources */,
+                ECO00011 /* ProfileViews.swift in Sources */,
+                ECO00013 /* MissionModels.swift in Sources */,
+                ECO00015 /* APIService.swift in Sources */,
+                ECO00017 /* LocationService.swift in Sources */,
+                ECO00019 /* CameraService.swift in Sources */,
+                ECO00021 /* MissionsViewModel.swift in Sources */,
+                ECO00023 /* MissionDetailViewModel.swift in Sources */,
+                ECO00025 /* SquadsViewModel.swift in Sources */,
+                ECO00027 /* ProfileViewModel.swift in Sources */,
+                ECO00029 /* CameraViewModel.swift in Sources */,
+                ECO00031 /* Extensions.swift in Sources */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+        ECO70000 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_COMMA = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = dwarf;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                ENABLE_TESTABILITY = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu17;
+                GCC_DYNAMIC_NO_PIC = NO;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_OPTIMIZATION_LEVEL = 0;
+                GCC_PREPROCESSOR_DEFINITIONS = (
+                    "DEBUG=1",
+                    "$(inherited)",
+                );
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+                MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+                MTL_FAST_MATH = YES;
+                ONLY_ACTIVE_ARCH = YES;
+                SDKROOT = iphoneos;
+                SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+            };
+            name = Debug;
+        };
+        ECO70001 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_COMMA = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+                ENABLE_NS_ASSERTIONS = NO;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu17;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+                MTL_ENABLE_DEBUG_INFO = NO;
+                MTL_FAST_MATH = YES;
+                SDKROOT = iphoneos;
+                SWIFT_COMPILATION_MODE = wholemodule;
+                VALIDATE_PRODUCT = YES;
+            };
+            name = Release;
+        };
+        ECO70002 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_ASSET_PATHS = "";
+                DEVELOPMENT_TEAM = "";
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = NO;
+                INFOPLIST_FILE = EcoSquad/Info.plist;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.ecosquad.app;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Debug;
+        };
+        ECO70003 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_ASSET_PATHS = "";
+                DEVELOPMENT_TEAM = "";
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = NO;
+                INFOPLIST_FILE = EcoSquad/Info.plist;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.ecosquad.app;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Release;
+        };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+        ECO50000 /* Build configuration list for PBXNativeTarget "EcoSquad" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                ECO70002 /* Debug */,
+                ECO70003 /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        ECO60001 /* Build configuration list for PBXProject "EcoSquad" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                ECO70000 /* Debug */,
+                ECO70001 /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+/* End XCConfigurationList section */
+    };
+    rootObject = ECO60000 /* Project object */;
+}

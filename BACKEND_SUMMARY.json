@@ -1,0 +1,168 @@
+{
+  "endpointsImplemented": [
+    {
+      "path": "/api/missions",
+      "method": "GET",
+      "status": "COMPLETE",
+      "description": "Discover nearby missions with geohash-based queries"
+    },
+    {
+      "path": "/api/missions",
+      "method": "POST",
+      "status": "COMPLETE",
+      "description": "Create new mission (admin/org only)"
+    },
+    {
+      "path": "/api/missions/:id",
+      "method": "GET",
+      "status": "COMPLETE",
+      "description": "Get single mission details"
+    },
+    {
+      "path": "/api/missions/:id",
+      "method": "PATCH",
+      "status": "COMPLETE",
+      "description": "Update mission (admin/org/squad leader)"
+    },
+    {
+      "path": "/api/missions/:id",
+      "method": "DELETE",
+      "status": "COMPLETE",
+      "description": "Delete mission (admin only)"
+    },
+    {
+      "path": "/api/missions/:id/claim",
+      "method": "POST",
+      "status": "COMPLETE",
+      "description": "Claim mission with transaction safety and expiry"
+    },
+    {
+      "path": "/api/missions/:id/submit-evidence",
+      "method": "POST",
+      "status": "COMPLETE",
+      "description": "Submit evidence with location validation"
+    },
+    {
+      "path": "/api/squads",
+      "method": "GET",
+      "status": "COMPLETE",
+      "description": "List squads with optional user filter"
+    },
+    {
+      "path": "/api/squads",
+      "method": "POST",
+      "status": "COMPLETE",
+      "description": "Create new squad"
+    },
+    {
+      "path": "/api/squads/:id",
+      "method": "GET",
+      "status": "COMPLETE",
+      "description": "Get squad details"
+    },
+    {
+      "path": "/api/squads/:id",
+      "method": "PATCH",
+      "status": "COMPLETE",
+      "description": "Update squad (leader only)"
+    },
+    {
+      "path": "/api/squads/:id",
+      "method": "DELETE",
+      "status": "COMPLETE",
+      "description": "Delete squad (leader only)"
+    },
+    {
+      "path": "/api/squads/:id/members",
+      "method": "GET",
+      "status": "COMPLETE",
+      "description": "List squad members"
+    },
+    {
+      "path": "/api/squads/:id/members",
+      "method": "POST",
+      "status": "COMPLETE",
+      "description": "Add member to squad"
+    },
+    {
+      "path": "/api/squads/:id/members",
+      "method": "DELETE",
+      "status": "COMPLETE",
+      "description": "Remove member from squad"
+    },
+    {
+      "path": "/api/auth/[...nextauth]",
+      "method": "GET|POST",
+      "status": "COMPLETE",
+      "description": "Cognito authentication handler"
+    }
+  ],
+  "databaseModels": [
+    "Mission",
+    "Squad",
+    "User",
+    "Evidence",
+    "DynamoDB single-table design with GSI"
+  ],
+  "middleware": [
+    {
+      "name": "Authentication",
+      "file": "src/lib/middleware/auth.ts",
+      "features": ["JWT verification", "Role-based access", "Cognito integration"]
+    },
+    {
+      "name": "Error Handling",
+      "file": "src/lib/middleware/error-handler.ts",
+      "features": ["Standardized errors", "Request IDs", "Zod error formatting"]
+    },
+    {
+      "name": "Rate Limiting",
+      "file": "src/lib/middleware/rate-limit.ts",
+      "features": ["In-memory store", "Configurable limits", "Rate limit headers"]
+    },
+    {
+      "name": "Validation",
+      "file": "src/lib/middleware/validation.ts",
+      "features": ["Zod schemas", "Body/query/param validation", "Input sanitization"]
+    }
+  ],
+  "services": [
+    {
+      "name": "DynamoDB",
+      "file": "src/lib/db/dynamodb.ts",
+      "features": ["Exponential backoff retries", "Transaction support", "Type-safe operations"]
+    },
+    {
+      "name": "Geo Service",
+      "file": "src/lib/services/geo-service.ts",
+      "features": ["Geohash encoding", "Distance calculations", "Radius queries"]
+    },
+    {
+      "name": "Verification Service",
+      "file": "src/lib/services/verification-service.ts",
+      "features": ["Image analysis", "AI verification", "Moderation"]
+    }
+  ],
+  "validationSchemas": [
+    "CreateMissionSchema",
+    "UpdateMissionSchema",
+    "ClaimMissionSchema",
+    "SubmitEvidenceSchema",
+    "CreateSquadSchema",
+    "UpdateSquadSchema",
+    "AddMemberSchema",
+    "DiscoverMissionsQuerySchema"
+  ],
+  "testCoverage": {
+    "unit": "To be implemented",
+    "integration": "To be implemented"
+  },
+  "manualSteps": [
+    "Set environment variables: COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, COGNITO_ISSUER",
+    "Set environment variables: DYNAMODB_TABLE_NAME, AWS_REGION",
+    "Deploy DynamoDB table with GSI for geo queries",
+    "Configure Cognito User Pool with appropriate groups (admin, organization)",
+    "Install dependencies: npm install",
+    "Run tests: npm test (when implemented)"
+  ]
+}

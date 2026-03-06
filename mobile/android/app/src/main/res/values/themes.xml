@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.EcoSquad" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="android:colorPrimary">@color/eco_green</item>
+        <item name="android:colorPrimaryDark">@color/eco_green_dark</item>
+        <item name="android:colorAccent">@color/ocean_blue</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/eco_green_dark</item>
+        <!-- Navigation bar color. -->
+        <item name="android:navigationBarColor">@color/black</item>
+        <!-- Light status bar text for dark backgrounds -->
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

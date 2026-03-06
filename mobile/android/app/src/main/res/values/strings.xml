@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">EcoSquad</string>
+    
+    <!-- Navigation -->
+    <string name="nav_missions">Missions</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_squad">Squad</string>
+    
+    <!-- Mission -->
+    <string name="mission_available">Available</string>
+    <string name="mission_claimed">Claimed</string>
+    <string name="mission_in_progress">In Progress</string>
+    <string name="mission_pending">Pending Verification</string>
+    <string name="mission_completed">Completed</string>
+    <string name="mission_expired">Expired</string>
+    
+    <!-- Mission Types -->
+    <string name="type_litter">Litter Collection</string>
+    <string name="type_tree">Tree Planting</string>
+    <string name="type_biodiversity">Biodiversity</string>
+    <string name="type_water">Water Quality</string>
+    <string name="type_recycling">Recycling</string>
+    <string name="type_restoration">Restoration</string>
+    
+    <!-- Actions -->
+    <string name="action_claim">Claim Mission</string>
+    <string name="action_submit_evidence">Submit Evidence</string>
+    <string name="action_take_photo">Take Photo</string>
+    <string name="action_view_map">View on Map</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_retry">Retry</string>
+    
+    <!-- Camera -->
+    <string name="camera_capture">Capture</string>
+    <string name="camera_retake">Retake</string>
+    <string name="camera_use_photo">Use Photo</string>
+    <string name="camera_permission_required">Camera permission is required to capture evidence</string>
+    <string name="location_permission_required">Location permission is required for missions</string>
+    
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_network">Network error. Check your connection.</string>
+    <string name="error_location">Unable to get location. Please enable GPS.</string>
+    <string name="error_camera">Camera error. Please try again.</string>
+    
+    <!-- Impact -->
+    <string name="impact_points">%d impact points</string>
+    <string name="total_impact">Total Impact</string>
+    <string name="missions_completed">Missions Completed</string>
+    <string name="active_missions">Active Missions</string>
+    
+    <!-- Empty States -->
+    <string name="no_missions_nearby">No missions nearby</string>
+    <string name="no_active_missions">No active missions</string>
+    <string name="pull_to_refresh">Pull to refresh</string>
+</resources>
