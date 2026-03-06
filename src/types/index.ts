@@ -14,6 +14,7 @@ export interface Mission {
   };
   impactPoints: number;
   createdAt: string;
+  updatedAt?: string;
   expiresAt?: string;
   claimedBy?: string;
   claimedAt?: string;
@@ -82,7 +83,9 @@ export interface Squad {
   members: SquadMember[];
   totalImpactPoints: number;
   completedMissions: number;
+  activeMissions?: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface SquadMember {
