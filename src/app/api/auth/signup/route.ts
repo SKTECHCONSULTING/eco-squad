@@ -3,11 +3,16 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcrypt';
 import { putItem } from '@/lib/db/dynamodb';
 import { User, DynamoDBUserItem } from '@/types';
 import { withErrorHandler, ConflictError } from '@/lib/middleware/error-handler';
 import { withBodyValidation } from '@/lib/middleware/validation';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import { SignupSchema, SignupInput } from '@/lib/validation/schemas';
+
+// bcrypt salt rounds (10 is recommended for production)
+const SALT_ROUNDS = 10;
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'EcoSquadTable';
 
@@ -24,9 +29,8 @@ async function signupHandler(
   const userId = uuidv4();
   const now = new Date();
 
-  // Hash password (in production, use bcrypt)
-  // For this demo, we'll store it as-is (NOT RECOMMENDED FOR PRODUCTION)
-  const hashedPassword = password; // TODO: Use proper hashing
+  // Hash password using bcrypt
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
   const user: User = {
     id: userId,
@@ -68,5 +72,7 @@ async function signupHandler(
 }
 
 export const POST = withErrorHandler(
-  withBodyValidation(SignupSchema, signupHandler)
+  withCsrfProtection(
+    withBodyValidation(SignupSchema, signupHandler)
+  )
 );

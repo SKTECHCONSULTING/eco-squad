@@ -116,7 +116,11 @@ export async function verifyEvidence(s3Key: string, missionType: string): Promis
       reasoning: verification.reasoning,
     };
   } catch (error) {
-    console.error('Error verifying evidence:', error);
+    // Sanitized logging - don't expose raw error details or PII
+    console.error('Verification failed for mission type:', { 
+      missionType, 
+      s3KeyPrefix: s3Key.split('/')[0] // Log only the prefix, not full key
+    });
     return {
       isValid: false,
       confidence: 0,

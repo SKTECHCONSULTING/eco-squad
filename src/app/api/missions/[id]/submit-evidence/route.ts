@@ -14,6 +14,7 @@ import {
 import { withBodyValidation, validateParams } from '@/lib/middleware/validation';
 import { requireAuth } from '@/lib/middleware/auth';
 import { withRateLimit } from '@/lib/middleware/rate-limit';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import {
   SubmitEvidenceSchema,
   UuidParamSchema,
@@ -241,18 +242,24 @@ async function triggerVerificationLambda(
   imageS3Key: string
 ): Promise<void> {
   // This would typically invoke a Lambda or publish to SNS/SQS
-  console.log(`Triggering verification for mission ${missionId}, image ${imageS3Key}`);
+  // Sanitized logging - don't log full S3 keys
+  console.log('Verification triggered', { 
+    missionId,
+    s3KeyPrefix: imageS3Key.split('/')[0]
+  });
 }
 
 // Export handler with middleware
 export const POST = withErrorHandler(
-  withRateLimit(
-    requireAuth(async (req, user, ctx) => {
-      const body = await req.json();
-      const validatedBody = SubmitEvidenceSchema.parse(body);
-      return submitEvidence(req, validatedBody, { ...ctx, user });
-    }),
-    'evidenceSubmit',
-    (req) => (req as any).user?.userId
+  withCsrfProtection(
+    withRateLimit(
+      requireAuth(async (req, user, ctx) => {
+        const body = await req.json();
+        const validatedBody = SubmitEvidenceSchema.parse(body);
+        return submitEvidence(req, validatedBody, { ...ctx, user });
+      }),
+      'evidenceSubmit',
+      (req) => (req as any).user?.userId
+    )
   )
 );

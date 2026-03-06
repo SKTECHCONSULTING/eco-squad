@@ -23,6 +23,7 @@ import {
 import { withBodyValidation, validateParams } from '@/lib/middleware/validation';
 import { requireAuth, optionalAuth } from '@/lib/middleware/auth';
 import { withRateLimit } from '@/lib/middleware/rate-limit';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import {
   CreateSquadSchema,
   UpdateSquadSchema,
@@ -602,13 +603,15 @@ export const GET = withErrorHandler(
 );
 
 export const POST = withErrorHandler(
-  withRateLimit(
-    requireAuth(async (req, user) => {
-      const body = await req.json();
-      const validatedBody = CreateSquadSchema.parse(body);
-      return createSquad(req, validatedBody, { user });
-    }),
-    'squadCreate',
-    (req) => (req as any).user?.userId
+  withCsrfProtection(
+    withRateLimit(
+      requireAuth(async (req, user) => {
+        const body = await req.json();
+        const validatedBody = CreateSquadSchema.parse(body);
+        return createSquad(req, validatedBody, { user });
+      }),
+      'squadCreate',
+      (req) => (req as any).user?.userId
+    )
   )
 );

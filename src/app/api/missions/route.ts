@@ -9,6 +9,7 @@ import { Mission, DynamoDBMissionItem } from '@/types';
 import { withErrorHandler, ValidationError } from '@/lib/middleware/error-handler';
 import { withQueryValidation } from '@/lib/middleware/validation';
 import { withRateLimit } from '@/lib/middleware/rate-limit';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import { requireMissionCreator, optionalAuth, getAuthUser } from '@/lib/middleware/auth';
 import {
   CreateMissionSchema,
@@ -148,9 +149,14 @@ export const GET = withErrorHandler(
 );
 
 export const POST = withErrorHandler(
-  requireMissionCreator(async (request, user) => {
-    const body = await request.json();
-    const validatedBody = CreateMissionSchema.parse(body);
-    return createMission(request, validatedBody, user);
-  })
+  withCsrfProtection(
+    withRateLimit(
+      requireMissionCreator(async (request, user) => {
+        const body = await request.json();
+        const validatedBody = CreateMissionSchema.parse(body);
+        return createMission(request, validatedBody, user);
+      }),
+      'auth'
+    )
+  )
 );

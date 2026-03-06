@@ -19,6 +19,7 @@ import {
 import { validateParams } from '@/lib/middleware/validation';
 import { requireAuth, isAdmin } from '@/lib/middleware/auth';
 import { withRateLimit } from '@/lib/middleware/rate-limit';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import { UuidParamSchema, UpdateSquadInput, UpdateSquadSchema } from '@/lib/validation/schemas';
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'EcoSquadTable';
@@ -201,15 +202,19 @@ export const GET = withErrorHandler(
 );
 
 export const PATCH = withErrorHandler(
-  withRateLimit(
-    requireAuth((req, user, ctx) => updateSquad(req, { ...ctx, user })),
-    'default'
+  withCsrfProtection(
+    withRateLimit(
+      requireAuth((req, user, ctx) => updateSquad(req, { ...ctx, user })),
+      'default'
+    )
   )
 );
 
 export const DELETE = withErrorHandler(
-  withRateLimit(
-    requireAuth((req, user, ctx) => deleteSquad(req, { ...ctx, user })),
-    'default'
+  withCsrfProtection(
+    withRateLimit(
+      requireAuth((req, user, ctx) => deleteSquad(req, { ...ctx, user })),
+      'default'
+    )
   )
 );

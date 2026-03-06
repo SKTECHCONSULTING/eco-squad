@@ -19,6 +19,7 @@ import {
 import { withBodyValidation, validateParams } from '@/lib/middleware/validation';
 import { requireAuth } from '@/lib/middleware/auth';
 import { withRateLimit } from '@/lib/middleware/rate-limit';
+import { withCsrfProtection } from '@/lib/middleware/csrf';
 import { ClaimMissionSchema, UuidParamSchema, ClaimMissionInput } from '@/lib/validation/schemas';
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'EcoSquadTable';
@@ -216,13 +217,15 @@ async function getSquadActiveMissions(squadId: string): Promise<number> {
 
 // Export handler with middleware
 export const POST = withErrorHandler(
-  withRateLimit(
-    requireAuth(async (req, user, ctx) => {
-      const body = await req.json();
-      const validatedBody = ClaimMissionSchema.parse(body);
-      return claimMission(req, validatedBody, { ...ctx, user });
-    }),
-    'missionClaim',
-    (req) => (req as any).user?.userId
+  withCsrfProtection(
+    withRateLimit(
+      requireAuth(async (req, user, ctx) => {
+        const body = await req.json();
+        const validatedBody = ClaimMissionSchema.parse(body);
+        return claimMission(req, validatedBody, { ...ctx, user });
+      }),
+      'missionClaim',
+      (req) => (req as any).user?.userId
+    )
   )
 );

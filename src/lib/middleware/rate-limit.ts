@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * INFRA LIMITATION NOTICE (BROKEN-ACCESS-01):
+ * This implementation uses an in-memory Map for rate limiting, which has the
+ * following limitations in a serverless/multi-instance deployment:
+ * 
+ * 1. Rate limits are not shared across Lambda/container instances
+ * 2. Each instance maintains its own independent counter
+ * 3. Restarts/cold starts reset the rate limit counters
+ * 
+ * FOR PRODUCTION: Migrate to Redis (ElastiCache) or AWS API Gateway throttling
+ * for consistent, distributed rate limiting across all instances.
+ * 
+ * Current implementation provides basic protection per-instance but is not
+ * suitable for high-security rate limiting requirements.
+ */
+
 // In-memory rate limiting store (use Redis in production)
 interface RateLimitEntry {
   count: number;
