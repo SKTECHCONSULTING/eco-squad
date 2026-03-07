@@ -1,0 +1,223 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: '20'
+  AWS_REGION: eu-west-1
+  ENVIRONMENT: prod
+
+jobs:
+  # ============================================================================
+  # Verify Deployment
+  # ============================================================================
+  verify:
+    name: Verify Deployment
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check confirmation
+      run: |
+        if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+          echo "❌ Deployment not confirmed. Please type 'deploy' to proceed."
+          exit 1
+        fi
+        echo "✅ Deployment confirmed"
+
+  # ============================================================================
+  # Test and Build
+  # ============================================================================
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    needs: verify
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install all dependencies
+      run: |
+        npm ci
+        cd backend && npm ci && cd ..
+        cd infra && npm ci && cd ..
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build all
+      run: |
+        cd backend && npm run build && cd ..
+        cd infra && npm run build && cd ..
+        npm run build
+
+  # ============================================================================
+  # Deploy Infrastructure
+  # ============================================================================
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: test-and-build
+    environment: production  # Requires manual approval
+    
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: infra/package-lock.json
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Install dependencies
+      working-directory: ./infra
+      run: npm ci
+
+    - name: Build infrastructure
+      working-directory: ./infra
+      run: npm run build
+
+    - name: Bootstrap CDK (if needed)
+      working-directory: ./infra
+      run: npx cdk bootstrap
+
+    - name: Deploy infrastructure
+      working-directory: ./infra
+      run: npx cdk deploy --require-approval never
+      env:
+        ENVIRONMENT: ${{ env.ENVIRONMENT }}
+        CORS_ORIGIN: ${{ vars.PROD_CORS_ORIGIN }}
+        OAUTH_CALLBACK_URLS: ${{ vars.PROD_OAUTH_CALLBACK_URLS }}
+        OAUTH_LOGOUT_URLS: ${{ vars.PROD_OAUTH_LOGOUT_URLS }}
+
+    - name: Save infrastructure outputs
+      working-directory: ./infra
+      run: |
+        echo "# Infrastructure Outputs - Production - $(date)" > ../infra-outputs-prod.txt
+        echo "" >> ../infra-outputs-prod.txt
+        echo "## Stack Outputs" >> ../infra-outputs-prod.txt
+        echo "" >> ../infra-outputs-prod.txt
+        npx cdk describe-stack-output EcoSquadStack >> ../infra-outputs-prod.txt || true
+        cat ../infra-outputs-prod.txt
+
+    - name: Upload outputs
+      uses: actions/upload-artifact@v4
+      with:
+        name: infra-outputs-prod
+        path: infra-outputs-prod.txt
+
+  # ============================================================================
+  # Deploy Frontend
+  # ============================================================================
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: deploy-infra
+    environment: production
+    
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+      env:
+        NEXT_PUBLIC_APP_URL: ${{ vars.PROD_APP_URL }}
+        NEXT_PUBLIC_API_URL: ${{ vars.PROD_API_URL }}
+
+    - name: Deploy to S3
+      run: |
+        # Get the bucket name from CloudFormation outputs
+        BUCKET_NAME=$(aws cloudformation describe-stacks \
+          --stack-name EcoSquadStack \
+          --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' \
+          --output text)
+        
+        echo "Deploying to bucket: $BUCKET_NAME"
+        aws s3 sync dist/ "s3://$BUCKET_NAME" --delete
+
+    - name: Invalidate CloudFront cache
+      run: |
+        # Get the distribution ID from CloudFormation outputs
+        DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+          --stack-name EcoSquadStack \
+          --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+          --output text)
+        
+        echo "Invalidating distribution: $DISTRIBUTION_ID"
+        aws cloudfront create-invalidation \
+          --distribution-id "$DISTRIBUTION_ID" \
+          --paths "/*"
+
+  # ============================================================================
+  # Smoke Tests
+  # ============================================================================
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-frontend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Wait for deployment
+      run: sleep 60  # Wait for CloudFront propagation
+
+    - name: Run smoke tests
+      run: |
+        echo "Testing production deployment..."
+        curl -sf "${{ vars.PROD_APP_URL }}" > /dev/null && echo "✅ Website is accessible" || echo "❌ Website check failed"
+        curl -sf "${{ vars.PROD_API_URL }}/missions?lat=48.8566&lng=2.3522&radius=5000" > /dev/null && echo "✅ API is accessible" || echo "❌ API check failed"
+
+    - name: Deployment Summary
+      run: |
+        echo "🎉 Production deployment completed!"
+        echo ""
+        echo "🌐 Website URL: ${{ vars.PROD_APP_URL }}"
+        echo "🔌 API URL: ${{ vars.PROD_API_URL }}"
+        echo ""
+        echo "⚠️  Please verify the deployment manually."

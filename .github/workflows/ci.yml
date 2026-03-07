@@ -1,0 +1,164 @@
+name: CI - Test and Build
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+env:
+  NODE_VERSION: '20'
+  AWS_REGION: eu-west-1
+
+jobs:
+  # ============================================================================
+  # Frontend Build and Test
+  # ============================================================================
+  frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Run tests
+      run: npm test -- --coverage --coverageDirectory=./coverage/frontend
+      continue-on-error: true
+
+    - name: Build frontend
+      run: npm run build
+      env:
+        # Dummy values for build
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        directory: ./coverage/frontend
+        flags: frontend
+        name: frontend-coverage
+
+  # ============================================================================
+  # Backend Build and Test
+  # ============================================================================
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Build backend
+      working-directory: ./backend
+      run: npm run build
+
+    - name: Run backend tests
+      working-directory: ./backend
+      run: npm test -- --coverage --coverageDirectory=../coverage/backend
+      continue-on-error: true
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        directory: ./coverage/backend
+        flags: backend
+        name: backend-coverage
+
+  # ============================================================================
+  # Infrastructure Build and Synth
+  # ============================================================================
+  infrastructure:
+    name: Infrastructure Build & Synth
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: infra/package-lock.json
+
+    - name: Install infrastructure dependencies
+      working-directory: ./infra
+      run: npm ci
+
+    - name: Build infrastructure
+      working-directory: ./infra
+      run: npm run build
+
+    - name: Synthesize CloudFormation
+      working-directory: ./infra
+      run: npx cdk synth
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        ENVIRONMENT: dev
+        # Dummy values for synth
+        CORS_ORIGIN: http://localhost:3000
+        OAUTH_CALLBACK_URLS: http://localhost:3000/auth/callback
+        OAUTH_LOGOUT_URLS: http://localhost:3000
+
+    - name: Run infrastructure tests
+      working-directory: ./infra
+      run: npm test
+
+  # ============================================================================
+  # Code Quality Checks
+  # ============================================================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install root dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Check TypeScript compilation
+      run: npx tsc --noEmit
+
+    - name: Check formatting (if Prettier is configured)
+      run: npx prettier --check . || echo "Prettier not configured or check failed"
+      continue-on-error: true

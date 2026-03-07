@@ -2,6 +2,22 @@
 
 Empowering communities to take environmental action through micro-volunteering missions.
 
+## 🚀 Quick Start (One-Command Setup)
+
+```bash
+# Clone and setup
+git clone https://github.com/SKTECHCONSULTING/eco-squad.git
+cd eco-squad
+npm install && npm run build:all
+
+# Configure environment
+cp .env.development .env
+# Edit .env with your AWS credentials
+
+# Start development
+npm run dev
+```
+
 ## 🌱 Mission
 
 EcoSquad connects environmentally conscious individuals and corporations with bite-sized, location-based environmental missions. From litter collection to biodiversity documentation, make a measurable impact in your community.
@@ -21,315 +37,167 @@ EcoSquad connects environmentally conscious individuals and corporations with bi
 ### Project Structure
 ```
 eco-squad/
-├── backend/             # Serverless Lambda functions
+├── .github/workflows/    # CI/CD pipelines
+├── backend/              # Serverless Lambda functions
 │   └── src/
-│       ├── functions/   # API Lambda handlers
-│       ├── lib/         # Shared utilities (db, validation, etc.)
-│       └── types/       # TypeScript types
-├── infra/               # AWS CDK infrastructure
-│   └── lib/
-│       └── eco-squad-stack.ts
-├── scripts/             # Deployment scripts
-│   └── deploy-frontend.sh
-├── src/                 # Next.js frontend (App Router)
-│   ├── app/            # Pages and layouts
-│   ├── components/     # React components
-│   └── lib/            # Frontend utilities
-└── mobile/             # Mobile apps (iOS/Android)
+│       ├── functions/    # API Lambda handlers
+│       ├── lib/          # Shared utilities
+│       └── types/        # TypeScript types
+├── infra/                # AWS CDK infrastructure
+│   ├── lib/              # CDK stack definitions
+│   └── iam/              # IAM policies
+├── scripts/              # Build and deployment scripts
+├── src/                  # Next.js frontend (App Router)
+│   ├── app/              # Pages and layouts
+│   ├── components/       # React components
+│   └── lib/              # Frontend utilities
+└── mobile/               # Mobile apps (iOS/Android)
     ├── ios/
     └── android/
 ```
 
-## 🚀 Getting Started
+## 📋 Prerequisites
 
-### Prerequisites
-- Node.js 18+
-- AWS CLI configured with appropriate credentials
-- AWS CDK installed globally: `npm install -g aws-cdk`
-- Git
+- **Node.js** 20+ ([Download](https://nodejs.org/))
+- **AWS CLI** 2.x configured ([Install](https://docs.aws.amazon.com/cli/))
+- **AWS CDK**: `npm install -g aws-cdk`
+- **Git**
 
-### Environment Variables
+## 🛠️ Development Setup
 
-Create a `.env` file in the root directory:
+### Option 1: Automated Setup (Recommended)
+
+```bash
+# Run the setup script
+npm install
+npm run build:all dev
+```
+
+### Option 2: Manual Setup
+
+```bash
+# Install root dependencies
+npm install
+
+# Install backend dependencies
+cd backend && npm install && cd ..
+
+# Install infrastructure dependencies
+cd infra && npm install && cd ..
+
+# Build everything
+npm run build:all
+```
+
+### Environment Configuration
+
+Create your environment file:
+
+```bash
+# For development
+cp .env.development .env
+
+# For production (never commit this!)
+cp .env.production .env.production.local
+```
+
+Edit `.env` with your AWS credentials:
 
 ```env
-# AWS Configuration
+# Required AWS Configuration
 AWS_REGION=eu-west-1
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 
 # Environment
 ENVIRONMENT=dev
+NODE_ENV=development
 
-# CORS (for local development)
-CORS_ORIGIN=http://localhost:3000
+# URLs (update after first deployment)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3001
 
-# Optional: OAuth Callback URLs (comma-separated)
-OAUTH_CALLBACK_URLS=http://localhost:3000/auth/callback
-OAUTH_LOGOUT_URLS=http://localhost:3000
+# Optional: For local development
+DYNAMODB_ENDPOINT=http://localhost:8000
+S3_LOCAL_ENDPOINT=http://localhost:4566
 ```
 
-### Installation
+### Validate Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/SKTECHCONSULTING/eco-squad.git
-cd eco-squad
+# Validate environment variables
+npm run validate
 
-# Install root dependencies
-npm install
+# Run all builds
+npm run build:all
 
-# Install infrastructure dependencies
-cd infra && npm install && cd ..
-
-# Install backend dependencies
-cd backend && npm install && cd ..
+# Run tests
+npm test
 ```
 
 ## 📦 Deployment
 
-### 1. Deploy Infrastructure (First Time Only)
-
-This deploys the CDK stack including DynamoDB, Cognito, Lambda functions, API Gateway, S3, and CloudFront.
+### Development Deployment
 
 ```bash
-# Bootstrap CDK (only needed once per AWS account/region)
-npm run bootstrap
-
-# Deploy all infrastructure
-npm run deploy:infra
+# Deploy to dev environment
+npm run deploy:dev
 ```
 
-The deployment will output:
-- `ApiUrl`: Your API Gateway endpoint
-- `UserPoolId`: Cognito User Pool ID
-- `UserPoolClientId`: Cognito App Client ID
-- `CloudFrontDomain`: Your website URL
-- `CloudFrontDistributionId`: For cache invalidation
+Or use GitHub Actions:
+- Push to `develop` branch for automatic deployment
 
-### 2. Deploy Frontend
+### Production Deployment
 
 ```bash
-# Build and deploy to S3 + CloudFront
-npm run deploy:frontend
-
-# Or manually:
-# npm run build
-# ./scripts/deploy-frontend.sh
+# Deploy to production
+npm run deploy:prod
 ```
 
-### 3. Deploy Everything
+Or use GitHub Actions:
+- Go to Actions → Deploy to Production → Run workflow
 
+### Manual Deployment Steps
+
+1. **Deploy Infrastructure**:
 ```bash
-# Build frontend and deploy everything
-npm run deploy:all
-```
-
-### Development Workflow
-
-```bash
-# Run local development server (frontend only)
-npm run dev
-
-# Synthesize CDK templates without deploying
-npm run synth
-
-# Deploy specific environment
-ENVIRONMENT=prod npm run deploy:infra
-```
-
-## 📚 API Documentation
-
-### Authentication
-
-All protected endpoints require a valid Cognito JWT token in the Authorization header:
-
-```
-Authorization: Bearer <jwt-token>
-```
-
-### Endpoints
-
-#### Missions
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/missions?lat={lat}&lng={lng}&radius={r}` | No | Discover nearby missions |
-| POST | `/missions` | Yes (Admin) | Create a new mission |
-| GET | `/missions/{id}` | No | Get mission details |
-| PATCH | `/missions/{id}` | Yes | Update mission |
-| DELETE | `/missions/{id}` | Yes (Admin) | Delete mission |
-| POST | `/missions/{id}/claim` | Yes | Claim a mission |
-| POST | `/missions/{id}/submit-evidence` | Yes | Submit evidence |
-
-#### Squads
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/squads` | No | List squads |
-| POST | `/squads` | Yes | Create a squad |
-| GET | `/squads/{id}` | No | Get squad details |
-| PATCH | `/squads/{id}` | Yes | Update squad |
-| DELETE | `/squads/{id}` | Yes | Delete squad |
-| GET | `/squads/{id}/members` | No | List members |
-| POST | `/squads/{id}/members` | Yes | Add member |
-| DELETE | `/squads/{id}/members/{userId}` | Yes | Remove member |
-
-### Example Request
-
-```bash
-# Get nearby missions
-curl "https://your-api.execute-api.eu-west-1.amazonaws.com/dev/missions?lat=48.8566&lng=2.3522&radius=5000"
-
-# Create mission (requires auth)
-curl -X POST "https://your-api.execute-api.eu-west-1.amazonaws.com/dev/missions" \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Park Cleanup",
-    "description": "Clean up litter at Central Park",
-    "type": "LITTER_COLLECTION",
-    "location": {"lat": 48.8566, "lng": 2.3522},
-    "impactPoints": 100,
-    "tags": ["park", "cleanup"]
-  }'
-```
-
-## 🛠️ Development
-
-### Backend Development
-
-The backend is organized as individual Lambda functions:
-
-```
-backend/src/functions/
-├── missions/
-│   ├── index.ts          # GET /missions, POST /missions
-│   ├── [id].ts           # GET /missions/:id, PATCH, DELETE
-│   ├── claim.ts          # POST /missions/:id/claim
-│   └── submit-evidence.ts # POST /missions/:id/submit-evidence
-└── squads/
-    ├── index.ts          # GET /squads, POST /squads
-    ├── [id].ts           # GET /squads/:id, PATCH, DELETE
-    └── members.ts        # GET /squads/:id/members, POST, DELETE
-```
-
-Each function:
-- Uses Zod for input validation
-- Returns standardized API responses
-- Supports CORS
-- Integrates with Cognito for authentication
-
-### Adding a New API Endpoint
-
-1. Create a new Lambda handler in `backend/src/functions/`
-2. Add the function to the CDK stack in `infra/lib/eco-squad-stack.ts`
-3. Add the API Gateway route with appropriate authorizer
-4. Deploy: `npm run deploy:infra`
-
-### Frontend Development
-
-The frontend is configured for static export:
-
-```bash
-# Development server
-npm run dev
-
-# Build for production (creates static files in `dist/`)
+cd infra
 npm run build
-
-# Preview production build
-npx serve dist
+npx cdk deploy
 ```
 
-### Environment-Specific Configuration
+2. **Note the outputs** (ApiUrl, UserPoolId, etc.)
 
-For production deployment:
+3. **Update environment variables** with the outputs
+
+4. **Build and deploy frontend**:
+```bash
+npm run build
+./scripts/deploy-frontend.sh
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+## 🐳 Docker Development
+
+For a consistent development environment:
 
 ```bash
-# Set environment
-export ENVIRONMENT=prod
+# Start all services
+docker-compose up
 
-# Update environment variables
-export CORS_ORIGIN=https://your-domain.com
-export OAUTH_CALLBACK_URLS=https://your-domain.com/auth/callback
+# Start specific services
+docker-compose up frontend dynamodb-local
 
-# Deploy
-npm run deploy:all
+# Stop everything
+docker-compose down -v
 ```
 
-## 📱 Mobile Apps
-
-### iOS
-Located in `mobile/ios/`. Built with SwiftUI.
-
-### Android
-Located in `mobile/android/`. Built with Jetpack Compose.
-
-### Mobile API Configuration
-
-After deploying the infrastructure, you need to configure the mobile apps to use your API Gateway URL.
-
-#### iOS Configuration
-
-Edit `mobile/ios/EcoSquad/Services/APIService.swift`:
-
-```swift
-// Update the baseURL in the APIService initializer
-init(baseURL: String = "https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev") {
-    self.baseURL = baseURL
-    self.session = session
-}
-```
-
-#### Android Configuration
-
-Edit `mobile/android/app/build.gradle.kts`:
-
-```kotlin
-android {
-    defaultConfig {
-        // Update API Base URL
-        buildConfigField("String", "API_BASE_URL", "\"https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev/\"")
-    }
-}
-```
-
-Or set via environment variable:
-```bash
-export API_BASE_URL="https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev/"
-```
-
-### Building Mobile Apps
-
-#### iOS Build
-```bash
-cd mobile/ios
-# Open in Xcode
-open EcoSquad.xcodeproj
-# Or build via command line:
-xcodebuild -project EcoSquad.xcodeproj -scheme EcoSquad -destination 'platform=iOS Simulator,name=iPhone 15'
-```
-
-#### Android Build
-```bash
-cd mobile/android
-# Debug APK
-./gradlew assembleDebug
-# Release APK (requires signing config)
-./gradlew assembleRelease
-```
-
-See individual README files in `mobile/ios/` and `mobile/android/` for detailed setup instructions.
-
-## 🔒 Security
-
-- All API endpoints use HTTPS
-- Authentication via Cognito JWT tokens
-- Protected endpoints validate user groups (Admins, Organizations, Volunteers)
-- CORS configured for specific origins
-- S3 buckets block public access
-- CloudFront provides DDoS protection
+Services available:
+- **Frontend**: http://localhost:3000
+- **DynamoDB Local**: http://localhost:8000
+- **DynamoDB Admin UI**: http://localhost:8001
+- **LocalStack**: http://localhost:4566
 
 ## 🧪 Testing
 
@@ -340,26 +208,105 @@ npm test
 # Run tests in watch mode
 npm run test:watch
 
-# Run CDK tests
-cd infra && npm test
+# Run tests with coverage
+npm run test:coverage
+
+# Run type checking
+npm run type-check
 ```
 
-## 📊 Monitoring
+## 🔧 Available Scripts
 
-- CloudWatch Logs for Lambda functions
-- CloudWatch Metrics for API Gateway
-- CloudWatch Alarms for 5xx errors
-- X-Ray tracing enabled
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run build:all` | Build frontend, backend, and infrastructure |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Fix ESLint errors |
+| `npm run format` | Format code with Prettier |
+| `npm run validate` | Validate environment variables |
+| `npm run test` | Run tests |
+| `npm run deploy:dev` | Deploy to development |
+| `npm run deploy:prod` | Deploy to production |
+| `npm run synth` | Synthesize CDK templates |
+| `npm run bootstrap` | Bootstrap CDK |
+| `npm run docker:dev` | Start Docker development environment |
 
-## 🗑️ Cleanup
+## 📚 API Documentation
 
-To destroy all infrastructure:
+### Authentication
+
+All protected endpoints require a valid Cognito JWT token:
+
+```
+Authorization: Bearer <jwt-token>
+```
+
+### Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/missions?lat={lat}&lng={lng}&radius={r}` | No | Discover nearby missions |
+| POST | `/missions` | Yes (Admin) | Create a new mission |
+| GET | `/missions/{id}` | No | Get mission details |
+| PATCH | `/missions/{id}` | Yes | Update mission |
+| DELETE | `/missions/{id}` | Yes (Admin) | Delete mission |
+| POST | `/missions/{id}/claim` | Yes | Claim a mission |
+| POST | `/missions/{id}/submit-evidence` | Yes | Submit evidence |
+| GET | `/squads` | No | List squads |
+| POST | `/squads` | Yes | Create a squad |
+| GET | `/squads/{id}` | No | Get squad details |
+| PATCH | `/squads/{id}` | Yes | Update squad |
+| DELETE | `/squads/{id}` | Yes | Delete squad |
+
+See [API.md](./API.md) for complete documentation.
+
+## 📱 Mobile Apps
+
+### iOS
+Located in `mobile/ios/`. Built with SwiftUI.
 
 ```bash
-cd infra && cdk destroy
+cd mobile/ios
+open EcoSquad.xcodeproj
 ```
 
-⚠️ **Warning**: This will delete all data in DynamoDB and S3 unless retention policies are set.
+### Android
+Located in `mobile/android/`. Built with Jetpack Compose.
+
+```bash
+cd mobile/android
+./gradlew assembleDebug
+```
+
+## 🔒 Security
+
+- All API endpoints use HTTPS
+- Authentication via Cognito JWT tokens
+- Protected endpoints validate user groups
+- CORS configured for specific origins
+- S3 buckets block public access
+- CloudFront provides DDoS protection
+
+See [infra/iam/](./infra/iam/) for IAM policies.
+
+## 🆘 Troubleshooting
+
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for solutions to common issues.
+
+Quick fixes:
+
+```bash
+# Clean and rebuild
+rm -rf node_modules dist .next
+npm install
+npm run build:all
+
+# Reset Docker environment
+docker-compose down -v
+docker-compose up
+```
 
 ## 🤝 Contributing
 
@@ -369,6 +316,21 @@ cd infra && cdk destroy
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### Code Quality
+
+We use:
+- **ESLint** for code linting
+- **Prettier** for code formatting
+- **Husky** for pre-commit hooks
+- **Jest** for testing
+
+Make sure to run before committing:
+```bash
+npm run lint
+npm run format
+npm test
+```
+
 ## 📄 License
 
 This project is licensed under the MIT License.
@@ -377,3 +339,10 @@ This project is licensed under the MIT License.
 
 - Built with ❤️ for environmental action
 - Powered by AWS, Next.js, and community volunteers
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/SKTECHCONSULTING/eco-squad/issues)
+- **Documentation**: See [DEPLOYMENT.md](./DEPLOYMENT.md) and [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
