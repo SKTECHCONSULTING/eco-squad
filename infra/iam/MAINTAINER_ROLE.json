@@ -1,0 +1,478 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudFormationReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:DescribeStacks",
+        "cloudformation:GetTemplate",
+        "cloudformation:GetTemplateSummary",
+        "cloudformation:ListChangeSets",
+        "cloudformation:ListStackResources",
+        "cloudformation:ListStacks",
+        "cloudformation:ValidateTemplate",
+        "cloudformation:EstimateTemplateCost",
+        "cloudformation:ListExports",
+        "cloudformation:ListImports"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "S3ReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:GetBucketLogging",
+        "s3:GetBucketNotification",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:GetObjectTagging",
+        "s3:GetObjectVersion",
+        "s3:ListBucket",
+        "s3:ListBucketVersions",
+        "s3:GetBucketCORS",
+        "s3:GetBucketWebsite",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetBucketPublicAccessBlock"
+      ],
+      "Resource": [
+        "arn:aws:s3:::eco-squad-*",
+        "arn:aws:s3:::eco-squad-*/*"
+      ]
+    },
+    {
+      "Sid": "S3LimitedWrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectTagging",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": [
+        "arn:aws:s3:::eco-squad-evidence-*/*",
+        "arn:aws:s3:::eco-squad-logs-*/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:DescribeTable",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:DescribeContinuousBackups",
+        "dynamodb:DescribeContributorInsights",
+        "dynamodb:ListTables",
+        "dynamodb:ListTagsOfResource"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:*:*:table/eco-squad-*",
+        "arn:aws:dynamodb:*:*:table/eco-squad-*/index/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBMaintenance",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:UpdateTable",
+        "dynamodb:UpdateTimeToLive",
+        "dynamodb:UpdateContinuousBackups",
+        "dynamodb:CreateBackup",
+        "dynamodb:DescribeBackup",
+        "dynamodb:ListBackups",
+        "dynamodb:RestoreTableFromBackup",
+        "dynamodb:UpdateContributorInsights",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource"
+      ],
+      "Resource": "arn:aws:dynamodb:*:*:table/eco-squad-*"
+    },
+    {
+      "Sid": "CognitoReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:DescribeUserPool",
+        "cognito-idp:DescribeUserPoolClient",
+        "cognito-idp:DescribeUserPoolDomain",
+        "cognito-idp:GetGroup",
+        "cognito-idp:GetUser",
+        "cognito-idp:ListGroups",
+        "cognito-idp:ListUserPoolClients",
+        "cognito-idp:ListUserPools",
+        "cognito-idp:ListUsers",
+        "cognito-idp:ListUsersInGroup",
+        "cognito-idp:GetIdentityProviderByIdentifier",
+        "cognito-idp:GetUserPoolMfaConfig",
+        "cognito-idp:GetSigningCertificate"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "CognitoUserManagement",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:AdminCreateUser",
+        "cognito-idp:AdminDeleteUser",
+        "cognito-idp:AdminDisableUser",
+        "cognito-idp:AdminEnableUser",
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminRemoveUserFromGroup",
+        "cognito-idp:AdminUpdateUserAttributes",
+        "cognito-idp:AdminResetUserPassword",
+        "cognito-idp:AdminSetUserPassword",
+        "cognito-idp:AdminConfirmSignUp",
+        "cognito-idp:AdminResendConfirmationCode"
+      ],
+      "Resource": "arn:aws:cognito-idp:*:*:userpool/*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "LambdaReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionCodeSigningConfig",
+        "lambda:GetPolicy",
+        "lambda:ListFunctions",
+        "lambda:ListTags",
+        "lambda:ListVersionsByFunction",
+        "lambda:ListAliases",
+        "lambda:GetAlias",
+        "lambda:ListLayerVersions",
+        "lambda:GetLayerVersion",
+        "lambda:GetFunctionConcurrency",
+        "lambda:GetFunctionEventInvokeConfig",
+        "lambda:GetProvisionedConcurrencyConfig"
+      ],
+      "Resource": "arn:aws:lambda:*:*:function:eco-squad-*"
+    },
+    {
+      "Sid": "LambdaMaintenance",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:PublishVersion",
+        "lambda:CreateAlias",
+        "lambda:UpdateAlias",
+        "lambda:DeleteAlias",
+        "lambda:AddPermission",
+        "lambda:RemovePermission",
+        "lambda:InvokeFunction",
+        "lambda:PutFunctionConcurrency",
+        "lambda:DeleteFunctionConcurrency",
+        "lambda:PutFunctionEventInvokeConfig",
+        "lambda:DeleteFunctionEventInvokeConfig",
+        "lambda:TagResource",
+        "lambda:UntagResource"
+      ],
+      "Resource": "arn:aws:lambda:*:*:function:eco-squad-*"
+    },
+    {
+      "Sid": "APIGatewayReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:GetRestApi",
+        "apigateway:GetRestApis",
+        "apigateway:GetResource",
+        "apigateway:GetResources",
+        "apigateway:GetMethod",
+        "apigateway:GetMethods",
+        "apigateway:GetIntegration",
+        "apigateway:GetMethodResponse",
+        "apigateway:GetIntegrationResponse",
+        "apigateway:GetDeployment",
+        "apigateway:GetDeployments",
+        "apigateway:GetStage",
+        "apigateway:GetStages",
+        "apigateway:GetApiKey",
+        "apigateway:GetApiKeys",
+        "apigateway:GetUsagePlan",
+        "apigateway:GetUsagePlans",
+        "apigateway:GetTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "APIGatewayMaintenance",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:UpdateStage",
+        "apigateway:FlushStageCache",
+        "apigateway:UpdateRestApi"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "IAMReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:ListRoles",
+        "iam:ListInstanceProfilesForRole",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/eco-squad-*",
+        "arn:aws:iam::*:policy/eco-squad-*"
+      ]
+    },
+    {
+      "Sid": "LogsFullAccess",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DeleteLogGroup",
+        "logs:DescribeLogGroups",
+        "logs:ListTagsLogGroup",
+        "logs:PutRetentionPolicy",
+        "logs:TagLogGroup",
+        "logs:UntagLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DeleteLogStream",
+        "logs:DescribeLogStreams",
+        "logs:FilterLogEvents",
+        "logs:GetLogEvents",
+        "logs:ListLogDeliveries"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/eco-squad-*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/eco-squad-*:*",
+        "arn:aws:logs:*:*:log-group:/aws/apigateway/eco-squad-*",
+        "arn:aws:logs:*:*:log-group:/aws/apigateway/eco-squad-*:*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:ListMetrics",
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListDashboards",
+        "cloudwatch:GetDashboard",
+        "cloudwatch:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:aws:cloudwatch:*:*:alarm:eco-squad-*",
+        "arn:aws:cloudwatch::*:dashboard/eco-squad-*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchMaintenance",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData",
+        "cloudwatch:PutDashboard",
+        "cloudwatch:DeleteDashboards",
+        "cloudwatch:DisableAlarmActions",
+        "cloudwatch:EnableAlarmActions",
+        "cloudwatch:TagResource",
+        "cloudwatch:UntagResource"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "SSMParameterReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "ssm:ListTagsForResource",
+        "ssm:DescribeParameters",
+        "ssm:GetParameterHistory"
+      ],
+      "Resource": "arn:aws:ssm:*:*:parameter/eco-squad/*"
+    },
+    {
+      "Sid": "SSMParameterMaintenance",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "ssm:DeleteParameters",
+        "ssm:AddTagsToResource",
+        "ssm:RemoveTagsFromResource",
+        "ssm:LabelParameterVersion"
+      ],
+      "Resource": "arn:aws:ssm:*:*:parameter/eco-squad/*"
+    },
+    {
+      "Sid": "SecretsManagerReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ],
+      "Resource": "arn:aws:secretsmanager:*:*:secret:eco-squad/*"
+    },
+    {
+      "Sid": "KMSReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "kms:DescribeKey",
+        "kms:GetKeyPolicy",
+        "kms:GetKeyRotationStatus",
+        "kms:ListAliases",
+        "kms:ListResourceTags"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:ResourceTag/Application": "eco-squad"
+        }
+      }
+    },
+    {
+      "Sid": "KMSDecrypt",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ],
+      "Resource": "arn:aws:kms:*:*:key/*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "kms:ViaService": [
+            "secretsmanager.*.amazonaws.com",
+            "ssm.*.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "RekognitionReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "rekognition:DetectLabels",
+        "rekognition:DetectModerationLabels",
+        "rekognition:DetectText"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": ["eu-west-1", "us-east-1"]
+        }
+      }
+    },
+    {
+      "Sid": "XRayReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets",
+        "xray:GetServiceGraph",
+        "xray:GetTraceGraph",
+        "xray:GetTraceSummaries",
+        "xray:BatchGetTraces"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EventsReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "events:DescribeRule",
+        "events:ListTagsForResource",
+        "events:ListRules",
+        "events:ListTargetsByRule"
+      ],
+      "Resource": "arn:aws:events:*:*:rule/eco-squad-*"
+    },
+    {
+      "Sid": "SNSReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "sns:GetTopicAttributes",
+        "sns:ListTagsForResource",
+        "sns:ListSubscriptionsByTopic",
+        "sns:ListTopics",
+        "sns:ListSubscriptions",
+        "sns:GetSubscriptionAttributes"
+      ],
+      "Resource": "arn:aws:sns:*:*:eco-squad-*"
+    },
+    {
+      "Sid": "SNSPublish",
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": "arn:aws:sns:*:*:eco-squad-*"
+    },
+    {
+      "Sid": "SQSReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ListQueues",
+        "sqs:ListQueueTags"
+      ],
+      "Resource": "arn:aws:sqs:*:*:eco-squad-*"
+    },
+    {
+      "Sid": "DenyProductionDestructive",
+      "Effect": "Deny",
+      "Action": [
+        "dynamodb:DeleteTable",
+        "s3:DeleteBucket",
+        "cognito-idp:DeleteUserPool",
+        "lambda:DeleteFunction"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/Environment": "prod"
+        }
+      }
+    }
+  ]
+}

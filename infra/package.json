@@ -16,12 +16,14 @@
     "synth": "cdk synth",
     "setup": "npm run build && npm run bootstrap && npm run deploy",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "deploy:frontend": "../scripts/deploy-frontend.sh"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "20.12.0",
     "aws-cdk": "^2.140.0",
+    "esbuild": "^0.20.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "~5.4.0"
@@ -33,23 +35,10 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/test"
-    ],
-    "testMatch": [
-      "**/*.test.ts"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json"
-    ],
-    "collectCoverageFrom": [
-      "lib/**/*.ts",
-      "!lib/**/*.d.ts"
-    ],
+    "roots": ["<rootDir>/test"],
+    "testMatch": ["**/*.test.ts"],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+    "collectCoverageFrom": ["lib/**/*.ts", "!lib/**/*.d.ts"],
     "coverageThreshold": {
       "global": {
         "branches": 70,

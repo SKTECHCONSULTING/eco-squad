@@ -1,9 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as cloudfront_origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
@@ -14,7 +17,9 @@ export class EcoSquadStack extends cdk.Stack {
   public readonly table: dynamodb.Table;
   public readonly evidenceBucket: s3.Bucket;
   public readonly userPool: cognito.UserPool;
-  public readonly verificationLambda: lambda.Function;
+  public readonly websiteBucket: s3.Bucket;
+  public readonly distribution: cloudfront.Distribution;
+  public readonly api: apigateway.RestApi;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -23,7 +28,7 @@ export class EcoSquadStack extends cdk.Stack {
     const environment = process.env.ENVIRONMENT || 'dev';
     const appName = 'eco-squad';
 
-    // Common tags for all resources
+    // Common tags
     const commonTags = {
       Application: appName,
       Environment: environment,
@@ -31,7 +36,6 @@ export class EcoSquadStack extends cdk.Stack {
       Project: 'EcoSquad',
     };
 
-    // Apply tags to the stack (will be inherited by resources that support tags)
     Object.entries(commonTags).forEach(([key, value]) => {
       cdk.Tags.of(this).add(key, value);
     });
@@ -48,10 +52,9 @@ export class EcoSquadStack extends cdk.Stack {
       removalPolicy: environment === 'prod' 
         ? cdk.RemovalPolicy.RETAIN 
         : cdk.RemovalPolicy.DESTROY,
-      timeToLiveAttribute: 'ttl', // TTL for mission expiration
+      timeToLiveAttribute: 'ttl',
     });
 
-    // GSI for Geohash-based queries (location-based mission discovery)
     this.table.addGlobalSecondaryIndex({
       indexName: 'GSI1',
       partitionKey: { name: 'GSI1PK', type: dynamodb.AttributeType.STRING },
@@ -59,7 +62,6 @@ export class EcoSquadStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // GSI for status-based queries (finding available missions)
     this.table.addGlobalSecondaryIndex({
       indexName: 'GSI2',
       partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
@@ -80,38 +82,11 @@ export class EcoSquadStack extends cdk.Stack {
         : cdk.RemovalPolicy.DESTROY,
       cors: [
         {
-          allowedMethods: [
-            s3.HttpMethods.GET, 
-            s3.HttpMethods.PUT, 
-            s3.HttpMethods.POST,
-            s3.HttpMethods.HEAD,
-          ],
-          allowedOrigins: process.env.CORS_ORIGINS?.split(',') || [
-            'http://localhost:3000',
-            'https://eco-squad.app',
-          ],
-          allowedHeaders: [
-            'Authorization',
-            'Content-Type',
-            'x-amz-content-sha256',
-            'x-amz-date',
-          ],
+          allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.HEAD],
+          allowedOrigins: process.env.CORS_ORIGINS?.split(',') || ['*'],
+          allowedHeaders: ['Authorization', 'Content-Type', 'x-amz-content-sha256', 'x-amz-date'],
           exposedHeaders: ['ETag', 'Content-Type'],
           maxAge: 3000,
-        },
-      ],
-      lifecycleRules: [
-        {
-          transitions: [
-            {
-              storageClass: s3.StorageClass.INFREQUENT_ACCESS,
-              transitionAfter: cdk.Duration.days(90),
-            },
-            {
-              storageClass: s3.StorageClass.GLACIER,
-              transitionAfter: cdk.Duration.days(365),
-            },
-          ],
         },
       ],
     });
@@ -136,20 +111,11 @@ export class EcoSquadStack extends cdk.Stack {
         ? cdk.RemovalPolicy.RETAIN 
         : cdk.RemovalPolicy.DESTROY,
       customAttributes: {
-        role: new cognito.StringAttribute({
-          minLen: 1,
-          maxLen: 50,
-          mutable: true,
-        }),
-        organizationId: new cognito.StringAttribute({
-          minLen: 1,
-          maxLen: 100,
-          mutable: true,
-        }),
+        role: new cognito.StringAttribute({ minLen: 1, maxLen: 50, mutable: true }),
+        organizationId: new cognito.StringAttribute({ minLen: 1, maxLen: 100, mutable: true }),
       },
     });
 
-    // User Pool Client
     const userPoolClient = new cognito.UserPoolClient(this, 'EcoSquadWebClient', {
       userPool: this.userPool,
       userPoolClientName: `${appName}-web-${environment}`,
@@ -168,22 +134,13 @@ export class EcoSquadStack extends cdk.Stack {
           cognito.OAuthScope.EMAIL,
           cognito.OAuthScope.PROFILE,
         ],
-        callbackUrls: process.env.OAUTH_CALLBACK_URLS?.split(',') || [
-          'http://localhost:3000/auth/callback',
-          'https://eco-squad.app/auth/callback',
-        ],
-        logoutUrls: process.env.OAUTH_LOGOUT_URLS?.split(',') || [
-          'http://localhost:3000',
-          'https://eco-squad.app',
-        ],
+        callbackUrls: process.env.OAUTH_CALLBACK_URLS?.split(',') || ['http://localhost:3000/auth/callback'],
+        logoutUrls: process.env.OAUTH_LOGOUT_URLS?.split(',') || ['http://localhost:3000'],
       },
       preventUserExistenceErrors: true,
     });
 
-    // ============================================================
     // Cognito Groups
-    // ============================================================
-    // Admins Group
     new cognito.CfnUserPoolGroup(this, 'AdminsGroup', {
       groupName: 'Admins',
       userPoolId: this.userPool.userPoolId,
@@ -191,7 +148,6 @@ export class EcoSquadStack extends cdk.Stack {
       precedence: 1,
     });
 
-    // Organizations Group
     new cognito.CfnUserPoolGroup(this, 'OrganizationsGroup', {
       groupName: 'Organizations',
       userPoolId: this.userPool.userPoolId,
@@ -199,7 +155,6 @@ export class EcoSquadStack extends cdk.Stack {
       precedence: 2,
     });
 
-    // Volunteers Group
     new cognito.CfnUserPoolGroup(this, 'VolunteersGroup', {
       groupName: 'Volunteers',
       userPoolId: this.userPool.userPoolId,
@@ -208,141 +163,216 @@ export class EcoSquadStack extends cdk.Stack {
     });
 
     // ============================================================
-    // Verification Lambda
+    // Lambda Functions
     // ============================================================
-    const verificationLogGroup = new logs.LogGroup(this, 'VerificationLambdaLogs', {
-      logGroupName: `/aws/lambda/${appName}-verification-${environment}`,
-      retention: environment === 'prod' 
-        ? logs.RetentionDays.ONE_MONTH 
-        : logs.RetentionDays.ONE_WEEK,
-    });
+    const lambdaEnvironment = {
+      TABLE_NAME: this.table.tableName,
+      BUCKET_NAME: this.evidenceBucket.bucketName,
+      USER_POOL_ID: this.userPool.userPoolId,
+      USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+      ENVIRONMENT: environment,
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+    };
 
-    this.verificationLambda = new lambda.Function(this, 'VerificationLambda', {
-      functionName: `${appName}-verification-${environment}`,
+    const commonLambdaProps = {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/verification')),
       timeout: cdk.Duration.seconds(30),
       memorySize: 512,
-      environment: {
-        TABLE_NAME: this.table.tableName,
-        BUCKET_NAME: this.evidenceBucket.bucketName,
-        ENVIRONMENT: environment,
-        REKOGNITION_MIN_CONFIDENCE: process.env.REKOGNITION_MIN_CONFIDENCE || '70',
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      },
-      logGroup: verificationLogGroup,
+      environment: lambdaEnvironment,
       tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        target: 'es2020',
+      },
+    };
+
+    // Missions Lambda Functions
+    const missionsListHandler = new lambda.NodejsFunction(this, 'MissionsListHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/missions/index.ts'),
+      handler: 'handler',
+      functionName: `${appName}-missions-list-${environment}`,
+      ...commonLambdaProps,
     });
 
-    // Add S3 bucket notification trigger for verification Lambda
-    this.evidenceBucket.addEventNotification(
-      s3.EventType.OBJECT_CREATED,
-      new s3n.LambdaDestination(this.verificationLambda),
-      { prefix: 'evidence/' }
-    );
+    const missionsDetailHandler = new lambda.NodejsFunction(this, 'MissionsDetailHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/missions/[id].ts'),
+      handler: 'handler',
+      functionName: `${appName}-missions-detail-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    const missionsClaimHandler = new lambda.NodejsFunction(this, 'MissionsClaimHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/missions/claim.ts'),
+      handler: 'handler',
+      functionName: `${appName}-missions-claim-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    const missionsSubmitHandler = new lambda.NodejsFunction(this, 'MissionsSubmitHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/missions/submit-evidence.ts'),
+      handler: 'handler',
+      functionName: `${appName}-missions-submit-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    // Squads Lambda Functions
+    const squadsListHandler = new lambda.NodejsFunction(this, 'SquadsListHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/squads/index.ts'),
+      handler: 'handler',
+      functionName: `${appName}-squads-list-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    const squadsDetailHandler = new lambda.NodejsFunction(this, 'SquadsDetailHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/squads/[id].ts'),
+      handler: 'handler',
+      functionName: `${appName}-squads-detail-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    const squadsMembersHandler = new lambda.NodejsFunction(this, 'SquadsMembersHandler', {
+      entry: path.join(__dirname, '../../backend/src/functions/squads/members.ts'),
+      handler: 'handler',
+      functionName: `${appName}-squads-members-${environment}`,
+      ...commonLambdaProps,
+    });
+
+    // Grant permissions
+    this.table.grantReadWriteData(missionsListHandler);
+    this.table.grantReadWriteData(missionsDetailHandler);
+    this.table.grantReadWriteData(missionsClaimHandler);
+    this.table.grantReadWriteData(missionsSubmitHandler);
+    this.table.grantReadWriteData(squadsListHandler);
+    this.table.grantReadWriteData(squadsDetailHandler);
+    this.table.grantReadWriteData(squadsMembersHandler);
 
     // ============================================================
-    // IAM Permissions (Least Privilege)
+    // API Gateway with Cognito Authorizer
     // ============================================================
+    const cognitoAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
+      cognitoUserPools: [this.userPool],
+      authorizerName: `${appName}-authorizer-${environment}`,
+    });
 
-    // DynamoDB permissions for verification Lambda
-    this.table.grantReadWriteData(this.verificationLambda);
+    const apiLogGroup = new logs.LogGroup(this, 'ApiGatewayLogs', {
+      logGroupName: `/aws/apigateway/${appName}-${environment}`,
+      retention: environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
+    });
 
-    // S3 permissions for verification Lambda
-    this.evidenceBucket.grantRead(this.verificationLambda);
+    this.api = new apigateway.RestApi(this, 'EcoSquadApi', {
+      restApiName: `${appName}-api-${environment}`,
+      deployOptions: {
+        stageName: environment,
+        loggingLevel: apigateway.MethodLoggingLevel.INFO,
+        dataTraceEnabled: true,
+        metricsEnabled: true,
+        accessLogDestination: new apigateway.LogGroupLogDestination(apiLogGroup),
+        accessLogFormat: apigateway.AccessLogFormat.clf(),
+      },
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ['Content-Type', 'Authorization', 'X-Amz-Date', 'X-Api-Key'],
+      },
+    });
 
-    // Rekognition permissions for verification Lambda
-    this.verificationLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'rekognition:DetectLabels',
-          'rekognition:DetectModerationLabels',
-        ],
-        resources: ['*'], // Rekognition doesn't support resource-level permissions
-        conditions: {
-          StringEquals: {
-            'aws:RequestedRegion': this.region,
-          },
+    // API Resources and Methods
+    const missionsResource = this.api.root.addResource('missions');
+    const missionResource = missionsResource.addResource('{id}');
+    const claimResource = missionResource.addResource('claim');
+    const submitResource = missionResource.addResource('submit-evidence');
+
+    const squadsResource = this.api.root.addResource('squads');
+    const squadResource = squadsResource.addResource('{id}');
+    const membersResource = squadResource.addResource('members');
+    const memberResource = membersResource.addResource('{userId}');
+
+    // Helper function to create method options with auth
+    const publicMethod = { methodResponses: [{ statusCode: '200' }] };
+    const protectedMethod = {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      methodResponses: [{ statusCode: '200' }],
+    };
+
+    // Missions endpoints
+    missionsResource.addMethod('GET', new apigateway.LambdaIntegration(missionsListHandler), publicMethod);
+    missionsResource.addMethod('POST', new apigateway.LambdaIntegration(missionsListHandler), protectedMethod);
+    
+    missionResource.addMethod('GET', new apigateway.LambdaIntegration(missionsDetailHandler), publicMethod);
+    missionResource.addMethod('PATCH', new apigateway.LambdaIntegration(missionsDetailHandler), protectedMethod);
+    missionResource.addMethod('DELETE', new apigateway.LambdaIntegration(missionsDetailHandler), protectedMethod);
+    
+    claimResource.addMethod('POST', new apigateway.LambdaIntegration(missionsClaimHandler), protectedMethod);
+    submitResource.addMethod('POST', new apigateway.LambdaIntegration(missionsSubmitHandler), protectedMethod);
+
+    // Squads endpoints
+    squadsResource.addMethod('GET', new apigateway.LambdaIntegration(squadsListHandler), publicMethod);
+    squadsResource.addMethod('POST', new apigateway.LambdaIntegration(squadsListHandler), protectedMethod);
+    
+    squadResource.addMethod('GET', new apigateway.LambdaIntegration(squadsDetailHandler), publicMethod);
+    squadResource.addMethod('PATCH', new apigateway.LambdaIntegration(squadsDetailHandler), protectedMethod);
+    squadResource.addMethod('DELETE', new apigateway.LambdaIntegration(squadsDetailHandler), protectedMethod);
+    
+    membersResource.addMethod('GET', new apigateway.LambdaIntegration(squadsMembersHandler), publicMethod);
+    membersResource.addMethod('POST', new apigateway.LambdaIntegration(squadsMembersHandler), protectedMethod);
+    memberResource.addMethod('DELETE', new apigateway.LambdaIntegration(squadsMembersHandler), protectedMethod);
+
+    // ============================================================
+    // S3 Static Website Bucket
+    // ============================================================
+    this.websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
+      bucketName: `${appName}-website-${this.account}-${environment}`,
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: 'index.html',
+      publicReadAccess: false,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: environment === 'prod' 
+        ? cdk.RemovalPolicy.RETAIN 
+        : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: environment !== 'prod',
+    });
+
+    // ============================================================
+    // CloudFront Distribution
+    // ============================================================
+    const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OAI');
+    this.websiteBucket.grantRead(originAccessIdentity);
+
+    this.distribution = new cloudfront.Distribution(this, 'Distribution', {
+      defaultBehavior: {
+        origin: new cloudfront_origins.S3Origin(this.websiteBucket, {
+          originAccessIdentity,
+        }),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      },
+      defaultRootObject: 'index.html',
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
         },
-      })
-    );
-
-    // CloudWatch logs permissions
-    this.verificationLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'logs:CreateLogStream',
-          'logs:PutLogEvents',
-        ],
-        resources: [verificationLogGroup.logGroupArn],
-      })
-    );
-
-    // X-Ray tracing permissions
-    this.verificationLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'xray:PutTraceSegments',
-          'xray:PutTelemetryRecords',
-        ],
-        resources: ['*'],
-      })
-    );
-
-    // ============================================================
-    // API Lambda (for Next.js API routes)
-    // ============================================================
-    const apiLogGroup = new logs.LogGroup(this, 'ApiLambdaLogs', {
-      logGroupName: `/aws/lambda/${appName}-api-${environment}`,
-      retention: environment === 'prod' 
-        ? logs.RetentionDays.ONE_MONTH 
-        : logs.RetentionDays.ONE_WEEK,
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+      ],
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+      enabled: true,
     });
-
-    const apiLambda = new lambda.Function(this, 'ApiLambda', {
-      functionName: `${appName}-api-${environment}`,
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromInline(`
-        exports.handler = async (event) => {
-          return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'API placeholder - replace with actual Next.js build' }),
-          };
-        };
-      `),
-      timeout: cdk.Duration.seconds(10),
-      memorySize: 1024,
-      environment: {
-        TABLE_NAME: this.table.tableName,
-        BUCKET_NAME: this.evidenceBucket.bucketName,
-        USER_POOL_ID: this.userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        ENVIRONMENT: environment,
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      },
-      logGroup: apiLogGroup,
-      tracing: lambda.Tracing.ACTIVE,
-    });
-
-    // API Lambda permissions
-    this.table.grantReadWriteData(apiLambda);
-    this.evidenceBucket.grantReadWrite(apiLambda);
 
     // ============================================================
     // CloudWatch Alarms
     // ============================================================
-    new cloudwatch.Alarm(this, 'VerificationErrorsAlarm', {
-      alarmName: `${appName}-verification-errors-${environment}`,
-      alarmDescription: 'Alarm when verification Lambda has errors',
-      metric: this.verificationLambda.metricErrors({
-        period: cdk.Duration.minutes(5),
-        statistic: 'Sum',
-      }),
+    new cloudwatch.Alarm(this, 'Api5xxErrors', {
+      metric: this.api.metricServerError(),
       threshold: 5,
       evaluationPeriods: 1,
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
@@ -354,55 +384,41 @@ export class EcoSquadStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'TableName', {
       value: this.table.tableName,
       description: 'DynamoDB Table Name',
-      exportName: `${appName}-table-name-${environment}`,
-    });
-
-    new cdk.CfnOutput(this, 'TableArn', {
-      value: this.table.tableArn,
-      description: 'DynamoDB Table ARN',
-      exportName: `${appName}-table-arn-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'BucketName', {
       value: this.evidenceBucket.bucketName,
       description: 'S3 Evidence Bucket Name',
-      exportName: `${appName}-bucket-name-${environment}`,
-    });
-
-    new cdk.CfnOutput(this, 'BucketArn', {
-      value: this.evidenceBucket.bucketArn,
-      description: 'S3 Evidence Bucket ARN',
-      exportName: `${appName}-bucket-arn-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPool.userPoolId,
       description: 'Cognito User Pool ID',
-      exportName: `${appName}-user-pool-id-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID',
-      exportName: `${appName}-user-pool-client-id-${environment}`,
     });
 
-    new cdk.CfnOutput(this, 'VerificationLambdaArn', {
-      value: this.verificationLambda.functionArn,
-      description: 'Verification Lambda ARN',
-      exportName: `${appName}-verification-lambda-arn-${environment}`,
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: this.api.url,
+      description: 'API Gateway URL',
     });
 
-    new cdk.CfnOutput(this, 'ApiLambdaArn', {
-      value: apiLambda.functionArn,
-      description: 'API Lambda ARN',
-      exportName: `${appName}-api-lambda-arn-${environment}`,
+    new cdk.CfnOutput(this, 'WebsiteBucketName', {
+      value: this.websiteBucket.bucketName,
+      description: 'S3 Website Bucket Name',
     });
 
-    new cdk.CfnOutput(this, 'Region', {
-      value: this.region,
-      description: 'AWS Region',
-      exportName: `${appName}-region-${environment}`,
+    new cdk.CfnOutput(this, 'CloudFrontDomain', {
+      value: this.distribution.distributionDomainName,
+      description: 'CloudFront Distribution Domain',
+    });
+
+    new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
+      value: this.distribution.distributionId,
+      description: 'CloudFront Distribution ID',
     });
   }
 }

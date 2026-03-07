@@ -10,7 +10,12 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "db:setup": "cd infra && npm run setup"
+    "db:setup": "cd infra && npm run setup",
+    "deploy:infra": "cd infra && npm run deploy",
+    "deploy:frontend": "./scripts/deploy-frontend.sh",
+    "deploy:all": "npm run build && npm run deploy:infra && npm run deploy:frontend",
+    "synth": "cd infra && npm run synth",
+    "bootstrap": "cd infra && npm run bootstrap"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.600.0",
