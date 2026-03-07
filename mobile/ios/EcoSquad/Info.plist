@@ -69,5 +69,10 @@
         <key>NSAllowsArbitraryLoads</key>
         <false/>
     </dict>
+    
+    <!-- API Configuration -->
+    <!-- Update this after deploying infrastructure (ApiUrl from CDK outputs) -->
+    <key>API_BASE_URL</key>
+    <string>https://api.ecosquad.app</string>
 </dict>
 </plist>

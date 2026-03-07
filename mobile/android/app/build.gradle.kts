@@ -22,8 +22,12 @@ android {
             useSupportLibrary = true
         }
 
-        // API Base URL - Change for production
-        buildConfigField("String", "API_BASE_URL", "\"https://api.ecosquad.app/\"")
+        // API Base URL - Can be overridden via environment variable or local.properties
+        val apiBaseUrl = System.getenv("API_BASE_URL") 
+            ?: project.findProperty("API_BASE_URL") as? String 
+            ?: "https://api.ecosquad.app/"
+        buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl}\"")
+        
         buildConfigField("String", "MAPS_API_KEY", "\"${project.findProperty("MAPS_API_KEY") ?: ""}\"")
     }
 

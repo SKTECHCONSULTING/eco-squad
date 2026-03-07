@@ -1,17 +1,30 @@
 # EcoSquad API Documentation
 
 ## Overview
-RESTful API for the EcoSquad environmental micro-volunteering platform.
+RESTful API for the EcoSquad environmental micro-volunteering platform. Built with AWS Lambda and API Gateway.
+
+## Base URL
+
+After deploying the infrastructure, the API Gateway URL will be output as `ApiUrl`:
+
+```
+https://{api-id}.execute-api.{region}.amazonaws.com/{stage}
+```
+
+Example:
+```
+https://abc123def.execute-api.eu-west-1.amazonaws.com/dev
+```
 
 ## Authentication
 
 ### Cognito Integration
-The API uses AWS Cognito for authentication via NextAuth.js.
+The API uses AWS Cognito for authentication with JWT Authorizers on API Gateway.
 
-**Environment Variables:**
+**Environment Variables (Frontend):**
 ```bash
-COGNITO_CLIENT_ID=
-COGNITO_CLIENT_SECRET=
+NEXT_PUBLIC_COGNITO_CLIENT_ID=your_client_id
+COGNITO_CLIENT_SECRET=your_client_secret
 COGNITO_ISSUER=https://cognito-idp.{region}.amazonaws.com/{userPoolId}
 ```
 
@@ -19,6 +32,12 @@ COGNITO_ISSUER=https://cognito-idp.{region}.amazonaws.com/{userPoolId}
 ```
 Authorization: Bearer {access_token}
 ```
+
+### Getting a Token
+
+1. Authenticate with Cognito (via hosted UI or API)
+2. Receive JWT access token
+3. Include token in all protected requests
 
 ## API Endpoints
 

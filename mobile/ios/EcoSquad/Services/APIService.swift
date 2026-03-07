@@ -31,8 +31,15 @@ actor APIService: APIServiceProtocol {
     
     // MARK: - Initialization
     
-    init(baseURL: String = "https://api.ecosquad.app", session: URLSession = .shared) {
-        self.baseURL = baseURL
+    init(baseURL: String? = nil, session: URLSession = .shared) {
+        // Try to get from parameter, then Info.plist, then default
+        if let providedURL = baseURL {
+            self.baseURL = providedURL
+        } else if let plistURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String {
+            self.baseURL = plistURL
+        } else {
+            self.baseURL = "https://api.ecosquad.app"
+        }
         self.session = session
     }
     

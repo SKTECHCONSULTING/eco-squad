@@ -266,6 +266,62 @@ Located in `mobile/ios/`. Built with SwiftUI.
 ### Android
 Located in `mobile/android/`. Built with Jetpack Compose.
 
+### Mobile API Configuration
+
+After deploying the infrastructure, you need to configure the mobile apps to use your API Gateway URL.
+
+#### iOS Configuration
+
+Edit `mobile/ios/EcoSquad/Services/APIService.swift`:
+
+```swift
+// Update the baseURL in the APIService initializer
+init(baseURL: String = "https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev") {
+    self.baseURL = baseURL
+    self.session = session
+}
+```
+
+#### Android Configuration
+
+Edit `mobile/android/app/build.gradle.kts`:
+
+```kotlin
+android {
+    defaultConfig {
+        // Update API Base URL
+        buildConfigField("String", "API_BASE_URL", "\"https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev/\"")
+    }
+}
+```
+
+Or set via environment variable:
+```bash
+export API_BASE_URL="https://your-api-id.execute-api.eu-west-1.amazonaws.com/dev/"
+```
+
+### Building Mobile Apps
+
+#### iOS Build
+```bash
+cd mobile/ios
+# Open in Xcode
+open EcoSquad.xcodeproj
+# Or build via command line:
+xcodebuild -project EcoSquad.xcodeproj -scheme EcoSquad -destination 'platform=iOS Simulator,name=iPhone 15'
+```
+
+#### Android Build
+```bash
+cd mobile/android
+# Debug APK
+./gradlew assembleDebug
+# Release APK (requires signing config)
+./gradlew assembleRelease
+```
+
+See individual README files in `mobile/ios/` and `mobile/android/` for detailed setup instructions.
+
 ## 🔒 Security
 
 - All API endpoints use HTTPS
