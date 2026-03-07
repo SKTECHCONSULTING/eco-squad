@@ -6,6 +6,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as cloudfront_origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
@@ -189,28 +190,28 @@ export class EcoSquadStack extends cdk.Stack {
     };
 
     // Missions Lambda Functions
-    const missionsListHandler = new lambda.NodejsFunction(this, 'MissionsListHandler', {
+    const missionsListHandler = new lambdaNodejs.NodejsFunction(this, 'MissionsListHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/missions/index.ts'),
       handler: 'handler',
       functionName: `${appName}-missions-list-${environment}`,
       ...commonLambdaProps,
     });
 
-    const missionsDetailHandler = new lambda.NodejsFunction(this, 'MissionsDetailHandler', {
+    const missionsDetailHandler = new lambdaNodejs.NodejsFunction(this, 'MissionsDetailHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/missions/[id].ts'),
       handler: 'handler',
       functionName: `${appName}-missions-detail-${environment}`,
       ...commonLambdaProps,
     });
 
-    const missionsClaimHandler = new lambda.NodejsFunction(this, 'MissionsClaimHandler', {
+    const missionsClaimHandler = new lambdaNodejs.NodejsFunction(this, 'MissionsClaimHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/missions/claim.ts'),
       handler: 'handler',
       functionName: `${appName}-missions-claim-${environment}`,
       ...commonLambdaProps,
     });
 
-    const missionsSubmitHandler = new lambda.NodejsFunction(this, 'MissionsSubmitHandler', {
+    const missionsSubmitHandler = new lambdaNodejs.NodejsFunction(this, 'MissionsSubmitHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/missions/submit-evidence.ts'),
       handler: 'handler',
       functionName: `${appName}-missions-submit-${environment}`,
@@ -218,21 +219,21 @@ export class EcoSquadStack extends cdk.Stack {
     });
 
     // Squads Lambda Functions
-    const squadsListHandler = new lambda.NodejsFunction(this, 'SquadsListHandler', {
+    const squadsListHandler = new lambdaNodejs.NodejsFunction(this, 'SquadsListHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/squads/index.ts'),
       handler: 'handler',
       functionName: `${appName}-squads-list-${environment}`,
       ...commonLambdaProps,
     });
 
-    const squadsDetailHandler = new lambda.NodejsFunction(this, 'SquadsDetailHandler', {
+    const squadsDetailHandler = new lambdaNodejs.NodejsFunction(this, 'SquadsDetailHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/squads/[id].ts'),
       handler: 'handler',
       functionName: `${appName}-squads-detail-${environment}`,
       ...commonLambdaProps,
     });
 
-    const squadsMembersHandler = new lambda.NodejsFunction(this, 'SquadsMembersHandler', {
+    const squadsMembersHandler = new lambdaNodejs.NodejsFunction(this, 'SquadsMembersHandler', {
       entry: path.join(__dirname, '../../backend/src/functions/squads/members.ts'),
       handler: 'handler',
       functionName: `${appName}-squads-members-${environment}`,

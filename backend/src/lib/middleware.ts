@@ -150,12 +150,18 @@ export function parseBody<T>(event: APIGatewayProxyEvent): T | null {
 
 // Parse query parameters
 export function getQueryParams(event: APIGatewayProxyEvent): Record<string, string> {
-  return event.queryStringParameters || {};
+  const params = event.queryStringParameters || {};
+  return Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined)
+  ) as Record<string, string>;
 }
 
 // Parse path parameters
 export function getPathParams(event: APIGatewayProxyEvent): Record<string, string> {
-  return event.pathParameters || {};
+  const params = event.pathParameters || {};
+  return Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined)
+  ) as Record<string, string>;
 }
 
 // Check if user is admin
